@@ -4,6 +4,15 @@
     "version": "0.0.5",
     "main": "lib/index.js",
     "typings": "lib/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Azimiao/koishi-plugin-cafe-bot-exp.git"
+    },
+    "author": {
+        "name": "WildRabbit",
+        "email": "admin@azimao.com",
+        "url": "https://www.azimiao.com"
+    },
     "files": [
         "lib",
         "dist"
