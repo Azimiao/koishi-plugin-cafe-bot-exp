@@ -1,7 +1,7 @@
 {
     "name": "@azimiao/koishi-plugin-cafe-bot-exp",
     "description": "cafe bot experiment",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "main": "lib/index.js",
     "typings": "lib/index.d.ts",
     "repository": {
@@ -28,7 +28,7 @@
     },
     "koishi": {
         "description": {
-            "zh": "轨迹Cafe概念版"
+            "zh": "轨迹CafeBot概念版"
         },
         "service": {
             "required": [
