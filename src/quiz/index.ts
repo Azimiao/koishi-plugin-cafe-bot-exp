@@ -4,7 +4,7 @@
 import { Context, Random, Schema, segment } from 'koishi'
 import { CafeBotQuizConfig } from './config';
 
-import { At } from '../at';
+import { At } from '../common/at';
 
 export const name = 'cafe-bot-exp.quiz';
 export const inject = ['http'];

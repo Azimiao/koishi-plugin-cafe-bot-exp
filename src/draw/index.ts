@@ -6,13 +6,13 @@ import { Context, Schema } from 'koishi'
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import fsExists from "fs.promises.exists";
-import { DailySeededName } from '../DailySeededName';
-import PseudoRandom from '../PseudoRandom';
+import { DailySeededName } from '../common/DailySeededName';
+import PseudoRandom from '../common/PseudoRandom';
 import HtmlCreator from './templete/html';
 
 import { CafeBotDrawConfig } from './config';
 
-import { At } from '../at';
+import { At } from '../common/at';
 
 export const name = 'cafe-bot-exp.draw';
 

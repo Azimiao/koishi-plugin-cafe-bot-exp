@@ -3,7 +3,7 @@
  */
 import { Context, Random, Schema, segment } from 'koishi'
 import { CafeBotCatConfig } from './config';
-import { At } from '../at';
+import { At } from '../common/at';
 
 export const name = 'cafe-bot-exp.cat';
 
