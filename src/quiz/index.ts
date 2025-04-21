@@ -25,14 +25,22 @@ export async function apply(ctx: Context, config: Config) {
     });
    
     ctx.command("轨迹答题/回答 <answer:text>", `使用"回答+选项"回答问题，如"回答 A"`).action(async (argv, answer) => {
-        await argv.session?.send("开发中");
-        return;
+        // await argv.session?.send("开发中");
+        // return;
 
         let selectNumber = -1;
         if (answer in validOptions) {
             selectNumber = validOptions[answer];
         } else {
-            argv.session?.send(`${At(argv)}回答错误~`);
+            await argv.session?.send(`${At(argv)}回答错误~`);
         }
+
+        if(selectNumber == 3){
+            await argv.session?.send(`<audio src="https://trails-game.com/wp-content/uploads/2021/07/renne.wav"/>`);
+            return;
+        }else{
+            await argv.session?.send(`${At(argv)}开发中`);
+        }
+
     });
 }
