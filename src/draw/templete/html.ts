@@ -141,14 +141,12 @@ function HtmlCreator(cardList) {
             <div class="card rarity-${item.star}">
             <div class="card-img" style="background:url('${item.url}')"></div>
             <div class="rarity rarity-${item.star}">${item.starText}</div>
-            </div>
-            `
-        })}
+            </div>`
+        }).join('')}
         </div>
     </div>
     </body>
-    </html>
-    `;
+    </html>`;
     return fullHtml;
 }
 
