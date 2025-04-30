@@ -1,7 +1,7 @@
 {
     "name": "@azimiao/koishi-plugin-cafe-bot-exp",
     "description": "cafe bot experiment",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "main": "lib/index.js",
     "typings": "lib/index.d.ts",
     "repository": {
@@ -32,7 +32,8 @@
         },
         "service": {
             "required": [
-                "http"
+                "http",
+                "cache"
             ]
         },
         "locales": [

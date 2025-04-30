@@ -13,6 +13,7 @@ import HtmlCreator from './templete/html';
 import { CafeBotDrawConfig } from './config';
 
 import { At } from '../common/at';
+import downloadFileIfNotExist from '../common/downloadTool';
 
 export const name = 'cafe-bot-exp.draw';
 
@@ -39,23 +40,17 @@ function shuffleWithCustomRandom(array, rand) {
 let star2Name = null;
 
 
-async function downloadCardDataIfNotExist(ctx: Context, config: Config) {
-    if (cafebotCardData != null && cafebotCardData.length > 0) {
+async function downloadCardDataIfNotExist(ctx: Context, config: Config,forceUpdate: boolean) {
+
+    if (!forceUpdate && cafebotCardData != null && cafebotCardData.length > 0) {
         return;
     }
+
     const root = path.join(ctx.baseDir, 'data', `${name}-data`)
     await fs.mkdir(root, { recursive: true });
     const cardFilePath = path.join(root, 'card.json');
-    var a = await fsExists(cardFilePath);
 
-    if (!a) {
-        console.log(`card data ${cardFilePath} not exist,try download from ${config.baseDataUrl}`);
-
-        // download card file
-        await ctx.http.get(config.baseDataUrl).then(async (res) => {
-            await fs.writeFile(cardFilePath, JSON.stringify(res));
-        });
-    }
+    await downloadFileIfNotExist(ctx.http,config.baseDataUrl,cardFilePath,forceUpdate);
 
     var fileContent = await fs.readFile(cardFilePath, "utf-8");
     try {
@@ -68,7 +63,7 @@ async function downloadCardDataIfNotExist(ctx: Context, config: Config) {
 
 async function getCards(seed, ctx, config) {
 
-    await downloadCardDataIfNotExist(ctx, config);
+    await downloadCardDataIfNotExist(ctx, config,false);
 
     let minCount = config.MinCount;
     let maxCount = config.MaxCount;
@@ -131,6 +126,8 @@ async function getCards(seed, ctx, config) {
 }
 
 export async function apply(ctx: Context,config: Config){
+    await downloadCardDataIfNotExist(ctx,config,config.forceUpdateDataWhenLoad);
+
     ctx.command('轨迹抽卡/给我抽', "进行每日抽卡").action(async (argv, _) => {
         let seed = DailySeededName(argv.session.userId);
         console.log(`getcard for ${seed}`);
@@ -215,6 +212,7 @@ export async function apply(ctx: Context,config: Config){
             await argv.session?.cancelQueued();
             console.log(`getcard img for ${seed} send ok~`);
         }).catch(async (e) => {
+            console.log(e);
             delete requestWebCache[seed];
             await argv.session?.sendQueued(`${At(argv)}图片生成失败`);
             await argv.session?.cancelQueued();

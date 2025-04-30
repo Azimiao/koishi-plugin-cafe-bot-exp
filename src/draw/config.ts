@@ -5,6 +5,7 @@ import { Schema } from "koishi";
 
 export interface CafeBotDrawConfig {
     baseDataUrl: string,
+    forceUpdateDataWhenLoad:boolean,
     ImageServer: string,
     ImageServerAuth: string,
     MinCount: number,
@@ -28,7 +29,7 @@ export interface CafeBotDrawConfig {
 
 export const CafeBotDrawConfig : Schema<CafeBotDrawConfig> = Schema.object({
     baseDataUrl: Schema.string().description("数据链接").default("https://www.azimiao.com/kiseki.json"),
-
+    forceUpdateDataWhenLoad: Schema.boolean().description("插件加载时强制刷新数据").default(false),
     ImageServer: Schema.string().description("图像生成服务器").default("http://127.0.0.1:3000/screenshot"),
     ImageServerAuth: Schema.string().description("图像生成服务器密码").default(""),
 

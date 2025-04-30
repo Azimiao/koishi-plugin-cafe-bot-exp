@@ -13,6 +13,8 @@ export const name = 'cafe-bot-exp'
 
 export * from "./config";
 
+export const inject = ['http','cache'];
+
 
 
 export async function apply(ctx: Context,config: Config) {
