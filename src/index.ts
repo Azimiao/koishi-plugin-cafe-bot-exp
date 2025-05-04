@@ -13,7 +13,7 @@ export const name = 'cafe-bot-exp'
 
 export * from "./config";
 
-export const inject = ['http','cache','logger'];
+export const inject = ['http','cache','logger', 'database'];
 
 
 
