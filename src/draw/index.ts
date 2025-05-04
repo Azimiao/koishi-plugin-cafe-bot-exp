@@ -2,7 +2,7 @@
  * 轨迹抽卡
  */
 
-import { Context, Schema } from 'koishi'
+import { Context, Schema, Logger } from 'koishi'
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import fsExists from "fs.promises.exists";
@@ -17,7 +17,7 @@ import downloadFileIfNotExist from '../common/downloadTool';
 
 export const name = 'cafe-bot-exp.draw';
 
-export const inject = ['http'];
+export const inject = ['http', 'logger'];
 
 export interface Config extends CafeBotDrawConfig{};
 export const Config: Schema<Config> = CafeBotDrawConfig;
@@ -26,6 +26,8 @@ const animals = ["瑟蕾奴", "可鲁贝洛斯", "捷欧", "基库", "蔡特", "
 const starEnum = [5, 4, 3, 2, 1];
 
 let cafebotCardData = [];
+
+let logger: Logger = null;
 
 // 对数组进行伪随机排列
 function shuffleWithCustomRandom(array, rand) {
@@ -126,17 +128,21 @@ async function getCards(seed, ctx, config) {
 }
 
 export async function apply(ctx: Context,config: Config){
+
+    logger = ctx.logger(name);
+
     await downloadCardDataIfNotExist(ctx,config,config.forceUpdateDataWhenLoad);
 
+    ctx.command("轨迹抽卡",`抽取你的每日轨迹人物卡吧~`);
     ctx.command('轨迹抽卡/给我抽', "进行每日抽卡").action(async (argv, _) => {
         let seed = DailySeededName(argv.session.userId);
-        console.log(`getcard for ${seed}`);
+        logger?.info(`getcard for ${seed}`);
         let randomer = new PseudoRandom(seed);
         let result = await getCards(seed, ctx, config);
 
         if (result.length <= 0) {
             let msg = "你并不是本群限定非酋, 只不过抽到的卡牌被" + animals[randomer.nextInt(0, animals.length - 1)] + "叼走了~\n";
-            console.log(`getcard for ${seed} is empty,send it`);
+            logger?.info(`getcard for ${seed} is empty,send it`);
             await argv.session?.send(`${At(argv)}${msg}`);
             return;
         }
@@ -159,7 +165,7 @@ export async function apply(ctx: Context,config: Config){
             }
         })
         await argv.session?.send(msg);
-        console.log(`getcard for ${seed} send ok`);
+        logger?.info(`getcard for ${seed} send ok`);
         return;
     });
 
@@ -169,7 +175,7 @@ export async function apply(ctx: Context,config: Config){
     ctx.command('轨迹抽卡/给我抽图', "进行抽卡并显示卡牌图片").action(async (argv, _) => {
 
         let seed = DailySeededName(argv.session.userId);
-        console.log(`getcard img for ${seed}`);
+        logger?.info(`getcard img for ${seed}`);
 
         let randomer = new PseudoRandom(seed);
         let result = await getCards(seed, ctx, config);
@@ -177,20 +183,20 @@ export async function apply(ctx: Context,config: Config){
         if (result.length <= 0) {
             let msg = "你并不是本群限定非酋, 只不过抽到的卡牌被" + animals[randomer.nextInt(0, animals.length - 1)] + "叼走了~\n"
             await argv.session?.send(`${At(argv)} ${msg}`);
-            console.log(`getcard img for ${seed} is empty`);
+            logger?.info(`getcard img for ${seed} is empty`);
             return;
         }
 
         if (requestWebCache[seed]) {
             await argv.session?.send(`${At(argv)} 请等待上次抽取完成哦~`);
-            console.log(`getcard img for ${seed}, another request is processing, send please wait`);
+            logger?.info(`getcard img for ${seed}, another request is processing, send please wait`);
             return;
         }
 
         requestWebCache[seed] = "waiting";
 
         await argv.session?.sendQueued(`${At(argv)} 抽取中,请稍候...`);
-        console.log(`getcard img for ${seed} is processing, send please wait`);
+        logger?.info(`getcard img for ${seed} is processing, send please wait`);
 
         var a = HtmlCreator(result);
 
@@ -202,6 +208,7 @@ export async function apply(ctx: Context,config: Config){
                 html: a,
                 auth: config.ImageServerAuth,
                 filename: seed,
+                nocache: config.ImageNoCache
             },
             {
                 responseType: "json"
@@ -210,13 +217,13 @@ export async function apply(ctx: Context,config: Config){
             delete requestWebCache[seed];
             await argv.session?.sendQueued(`${At(argv)}<img src="${res.data}"/>`);
             await argv.session?.cancelQueued();
-            console.log(`getcard img for ${seed} send ok~`);
+            logger?.info(`getcard img for ${seed} send ok~`);
         }).catch(async (e) => {
-            console.log(e);
+            logger?.error(`getcard img for ${seed} is failed, send create failed`);
+            logger?.error(e);
             delete requestWebCache[seed];
-            await argv.session?.sendQueued(`${At(argv)}图片生成失败`);
+            await argv.session?.sendQueued(`${At(argv)}超级计算机『卡佩尔』发生核心故障😵(A...D...)`);
             await argv.session?.cancelQueued();
-            console.log(`getcard img for ${seed} is failed, send create failed`);
         })
         return;
     });

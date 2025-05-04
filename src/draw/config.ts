@@ -8,6 +8,8 @@ export interface CafeBotDrawConfig {
     forceUpdateDataWhenLoad:boolean,
     ImageServer: string,
     ImageServerAuth: string,
+    ImageNoCache: boolean,
+
     MinCount: number,
     MaxCount: number,
 
@@ -32,6 +34,7 @@ export const CafeBotDrawConfig : Schema<CafeBotDrawConfig> = Schema.object({
     forceUpdateDataWhenLoad: Schema.boolean().description("插件加载时强制刷新数据").default(false),
     ImageServer: Schema.string().description("图像生成服务器").default("http://127.0.0.1:3000/screenshot"),
     ImageServerAuth: Schema.string().description("图像生成服务器密码").default(""),
+    ImageNoCache: Schema.boolean().description("每次都重新生成图片(一般仅用于Debug)").default(false),
 
     MinCount: Schema.number().description("最小抽取次数").default(0),
     MaxCount: Schema.number().description("最大抽取次数").default(8),
