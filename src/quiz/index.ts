@@ -256,12 +256,17 @@ D. ${qOptions[3].s}`;
             let total = right + userQuizA.wrong;
             let percent = Math.round((userQuizA.right * 1.0 / total) * 100);
             let comment = "继续努力吧~";
-            if (percent >= 95) {
-                comment = "哇，难道您就是传说中的桂皮?!";
-            } else if (total >= 80) {
-                comment = "离合格的桂皮只有一步之遥?!";
-            } else if (total >= 50) {
-                comment = "正在成为桂皮中……";
+            
+            if(total >= 6){
+                if (percent >= 90) {
+                    comment = "哇，难道您就是传说中的桂皮?!";
+                } else if (percent >= 70) {
+                    comment = "离合格的桂皮只有一步之遥?!";
+                } else if (percent >= 60) {
+                    comment = "正在成为桂皮中……";
+                } else if(percent <= 25){
+                    comment = "开除桂皮籍！😤"
+                }
             }
 
             await argv.session?.send(`${At(argv)}你的答题数据：\n - 答题总数: ${total}\n - 正确回答: ${right}\n - 正确率: ${percent}%\n${comment}`);
