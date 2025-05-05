@@ -154,6 +154,8 @@ export async function apply(ctx: Context, config: Config) {
 
     await downloadQuitDataIfNotExist(ctx, config, config.forceUpdateWhenLoad);
 
+    ctx.command("轨迹答题").usage('通过趣味答题看看你是不是合格的桂皮吧~');
+
     ctx.command("轨迹答题/出题", "随机抽一道题目").action(async (argv, _) => {
 
         await downloadQuitDataIfNotExist(ctx, config, false);
@@ -218,7 +220,6 @@ D. ${qOptions[3].s}`;
         return;
     });
 
-    ctx.command("轨迹答题").usage('通过趣味答题看看你是不是合格的桂皮吧~');
     ctx.command("轨迹答题/回答 <answer:text>", `使用"回答+空格+选项"回答问题，另外你也可以直接@我说出选项(ABCD)哦`).action(async (argv, answer) => {
         await answerHandler(ctx, config, argv, answer);
         return;
