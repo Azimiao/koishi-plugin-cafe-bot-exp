@@ -1,5 +1,5 @@
 /**
- * 轨迹答题
+ * 轨迹问答
  */
 import { Context, Random, Schema, segment, Logger } from 'koishi';
 import { } from '@koishijs/plugin-help';
@@ -154,9 +154,9 @@ export async function apply(ctx: Context, config: Config) {
 
     await downloadQuitDataIfNotExist(ctx, config, config.forceUpdateWhenLoad);
 
-    ctx.command("轨迹答题").usage('通过趣味答题看看你是不是合格的桂皮吧~');
+    ctx.command("轨迹问答", '证明自己是合格的桂皮吧~');
 
-    ctx.command("轨迹答题/出题", "随机抽一道题目").action(async (argv, _) => {
+    ctx.command("轨迹问答/出题", "随机抽一道题目").action(async (argv, _) => {
 
         await downloadQuitDataIfNotExist(ctx, config, false);
 
@@ -220,32 +220,32 @@ D. ${qOptions[3].s}`;
         return;
     });
 
-    ctx.command("轨迹答题/回答 <answer:text>", `使用"回答+空格+选项"回答问题，另外你也可以直接@我说出选项(ABCD)哦`).action(async (argv, answer) => {
+    ctx.command("轨迹问答/回答 <answer:text>", `使用"回答+空格+选项"回答问题，另外你也可以直接@我说出选项(ABCD)哦`).action(async (argv, answer) => {
         await answerHandler(ctx, config, argv, answer);
         return;
     });
 
-    ctx.command("轨迹答题/A", "选择 A 选项", { hidden: true }).action(async (argv, _) => {
+    ctx.command("轨迹问答/A", "选择 A 选项", { hidden: true }).action(async (argv, _) => {
         await answerHandler(ctx, config, argv, 'A');
         return;
     });
 
-    ctx.command("轨迹答题/B", "选择 B 选项", { hidden: true }).action(async (argv, _) => {
+    ctx.command("轨迹问答/B", "选择 B 选项", { hidden: true }).action(async (argv, _) => {
         await answerHandler(ctx, config, argv, 'B');
         return;
     });
 
-    ctx.command("轨迹答题/C", "选择 C 选项", { hidden: true }).action(async (argv, _) => {
+    ctx.command("轨迹问答/C", "选择 C 选项", { hidden: true }).action(async (argv, _) => {
         await answerHandler(ctx, config, argv, 'C');
         return;
     });
 
-    ctx.command("轨迹答题/D", "选择 D 选项", { hidden: true }).action(async (argv, _) => {
+    ctx.command("轨迹问答/D", "选择 D 选项", { hidden: true }).action(async (argv, _) => {
         await answerHandler(ctx, config, argv, 'D');
         return;
     });
 
-    ctx.command("轨迹答题/答题分", "查看答题总分数").action(async (argv, _) => {
+    ctx.command("轨迹问答/答题分", "查看答题总分数").action(async (argv, _) => {
         const userQuiz: CafeQuiz[] = await ctx.database.get('cafeQuiz', { userId: argv.session.userId });
 
         if (userQuiz.length === 0) {
@@ -257,15 +257,15 @@ D. ${qOptions[3].s}`;
             let total = right + userQuizA.wrong;
             let percent = Math.round((userQuizA.right * 1.0 / total) * 100);
             let comment = "继续努力吧~";
-            
-            if(total >= 6){
+
+            if (total >= 6) {
                 if (percent >= 90) {
                     comment = "哇，难道您就是传说中的桂皮?!";
                 } else if (percent >= 70) {
                     comment = "离合格的桂皮只有一步之遥?!";
                 } else if (percent >= 60) {
                     comment = "正在成为桂皮中……";
-                } else if(percent <= 25){
+                } else if (percent <= 25) {
                     comment = "开除桂皮籍！😤"
                 }
             }
