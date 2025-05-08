@@ -2,7 +2,7 @@
  * 轨迹抽卡
  */
 
-import { Context, Schema, Logger } from 'koishi'
+import { Context, Schema, Logger, Dict } from 'koishi'
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import fsExists from "fs.promises.exists";
@@ -17,9 +17,15 @@ import downloadFileIfNotExist from '../common/downloadTool';
 
 export const name = 'cafe-bot-exp.draw';
 
-export const inject = ['http', 'logger'];
+export const injectDepend = 
+{
+    required:['http'],
+    optional:['logger']
+};
 
-export interface Config extends CafeBotDrawConfig{};
+export const inject = ['http'];
+
+export interface Config extends CafeBotDrawConfig { };
 export const Config: Schema<Config> = CafeBotDrawConfig;
 
 const animals = ["瑟蕾奴", "可鲁贝洛斯", "捷欧", "基库", "蔡特", "柯贝", "古利亚诺斯", "小星", "影良", "fio", "xeros"];
@@ -42,7 +48,7 @@ function shuffleWithCustomRandom(array, rand) {
 let star2Name = null;
 
 
-async function downloadCardDataIfNotExist(ctx: Context, config: Config,forceUpdate: boolean) {
+async function downloadCardDataIfNotExist(ctx: Context, config: Config, forceUpdate: boolean) {
 
     if (!forceUpdate && cafebotCardData != null && cafebotCardData.length > 0) {
         return;
@@ -52,7 +58,7 @@ async function downloadCardDataIfNotExist(ctx: Context, config: Config,forceUpda
     await fs.mkdir(root, { recursive: true });
     const cardFilePath = path.join(root, 'card.json');
 
-    await downloadFileIfNotExist(ctx.http,config.baseDataUrl,cardFilePath,forceUpdate);
+    await downloadFileIfNotExist(ctx.http, config.baseDataUrl, cardFilePath, forceUpdate);
 
     var fileContent = await fs.readFile(cardFilePath, "utf-8");
     try {
@@ -65,7 +71,7 @@ async function downloadCardDataIfNotExist(ctx: Context, config: Config,forceUpda
 
 async function getCards(seed, ctx, config) {
 
-    await downloadCardDataIfNotExist(ctx, config,false);
+    await downloadCardDataIfNotExist(ctx, config, false);
 
     let minCount = config.MinCount;
     let maxCount = config.MaxCount;
@@ -127,13 +133,13 @@ async function getCards(seed, ctx, config) {
     return result;
 }
 
-export async function apply(ctx: Context,config: Config){
+export async function apply(ctx: Context, config: Config) {
 
     logger = ctx.logger(name);
 
-    await downloadCardDataIfNotExist(ctx,config,config.forceUpdateDataWhenLoad);
+    await downloadCardDataIfNotExist(ctx, config, config.forceUpdateDataWhenLoad);
 
-    ctx.command("轨迹抽卡",`抽取你的每日轨迹人物卡吧~`);
+    ctx.command("轨迹抽卡", `抽取你的每日轨迹人物卡吧~`);
     ctx.command('轨迹抽卡/给我抽', "进行每日抽卡").action(async (argv, _) => {
         let seed = DailySeededName(argv.session.userId);
         logger?.info(`getcard for ${seed}`);

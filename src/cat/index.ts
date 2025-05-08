@@ -10,6 +10,13 @@ export const name = 'cafe-bot-exp.cat';
 export interface Config extends CafeBotCatConfig{};
 export const Config: Schema<Config> = CafeBotCatConfig;
 
+export const injectDepend = {
+    required:[],
+    optional: ['logger']
+};
+
+export const inject = [];
+
 const catWords = [
     "喵呀呜～ ",
     "喵呀～呵", // 走这边。（带路时）
@@ -33,7 +40,6 @@ const catWords = [
     "咪～呜 ", // 肚子饿了。（幼猫语）
     "咪～～呵" // 对不起
 ];
-
 
 export async function apply(ctx: Context) {
 

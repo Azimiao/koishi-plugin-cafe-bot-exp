@@ -14,7 +14,15 @@ import { DailySeededName } from '../common/DailySeededName';
 import CafeTimeTools from '../common/CafeTimeTools';
 
 export const name = 'cafe-bot-exp.quiz';
-export const inject = ['http', 'cache', 'logger'];
+
+export const injectDepend = {
+    required: ['http','cache', 'database'],
+    optional: ['censor','logger']
+};
+
+export const inject = ['http','cache', 'database'];
+
+
 export interface Config extends CafeBotQuizConfig { };
 export const Config: Schema<Config> = CafeBotQuizConfig;
 
@@ -126,13 +134,14 @@ async function answerHandler(ctx: Context, config: Config, argv, answer: string)
     logger?.info(`${argv.session.userId} try answer quiz(id:${lastQuestion.question}): right answer:${lastQuestion.answer}, input answer:${selectNumber}`);
 
     if (qItem && lastQuestion.answer == selectNumber) {
-        await argv.session?.send(`${At(argv)}回答正确😊${qItem.explain.length > 0 ? '，' + qItem.explain : ''}`);
+        await argv.session?.send(`${At(argv)}回答正确😊${qItem.explain.length > 0 ? `，${ctx.censor ? '<censor>' : ''}` + qItem.explain + `${ctx.censor ? '</censor>' : ''}` : ''}`);
         await ctx.database.set('cafeQuiz', userQuizA.id, {
             right: userQuizA.right + 1
         });
         return;
     } else {
-        await argv.session?.send(`${At(argv)}回答错误😟${qItem.explain2.length > 0 ? '，' + qItem.explain2 : ''}`);
+        await argv.session?.send(`${At(argv)}回答错误😟${qItem.explain2.length > 0 ? `，${ctx.censor ? '<censor>' : ''}` + qItem.explain2 + `${ctx.censor ? '</censor>' : ''}` : ''}`);
+
         await ctx.database.set('cafeQuiz', userQuizA.id, {
             wrong: userQuizA.wrong + 1
         });
@@ -211,11 +220,11 @@ export async function apply(ctx: Context, config: Config) {
 
         await ctx.cache.set('question', argv.session.userId, { question: randomId, answer: answerIndex }, config.answerTimeout * 1000);
 
-        var messageQuestion = `${qItem.question.img.length > 0 ? `<img src="${qItem.question.img}"/>` : ``}${At(argv)}${qItem.question.s}
+        var messageQuestion = `${qItem.question.img.length > 0 ? `<img src="${qItem.question.img}"/>` : ``}${At(argv)}${ctx.censor ? '<censor>' : ''}${qItem.question.s}
 A. ${qOptions[0].s}
-B. ${qOptions[1].s}
+B. ${qOptions[1].s} 
 C. ${qOptions[2].s}
-D. ${qOptions[3].s}`;
+D. ${qOptions[3].s}${ctx.censor ? '</censor>' : ''}`;
         await argv.session?.send(messageQuestion);
         return;
     });
