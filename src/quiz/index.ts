@@ -4,7 +4,7 @@
 import { Context, Random, Schema, segment, Logger } from 'koishi';
 import { } from '@koishijs/plugin-help';
 import { } from '@koishijs/cache';
-
+import { } from "@koishijs/plugin-adapter-qq";
 import { At } from '../common/at';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -16,11 +16,11 @@ import CafeTimeTools from '../common/CafeTimeTools';
 export const name = 'cafe-bot-exp.quiz';
 
 export const injectDepend = {
-    required: ['http','cache', 'database'],
-    optional: ['censor','logger']
+    required: ['http', 'cache', 'database'],
+    optional: ['censor', 'logger']
 };
 
-export const inject = ['http','cache', 'database'];
+export const inject = ['http', 'cache', 'database'];
 
 
 export interface Config extends CafeBotQuizConfig { };
@@ -164,6 +164,114 @@ export async function apply(ctx: Context, config: Config) {
     await downloadQuitDataIfNotExist(ctx, config, config.forceUpdateWhenLoad);
 
     ctx.command("轨迹问答", '证明自己是合格的桂皮吧~');
+
+    ctx.command("轨迹问答/新版出题", "测试新版出题功能", { hidden: true }).action(async (argv, _) => {
+        await downloadQuitDataIfNotExist(ctx, config, false);
+
+        var lastQuestion = await ctx.cache.get('question', argv.session.userId);
+        if (lastQuestion) {
+            await argv.session?.send("上一题还没有回答哦~");
+            return;
+        }
+
+        var dailyNameKey = DailySeededName(argv.session.userId);
+        argv.session.user
+
+
+        if (quizDataIds == null || quizDataIds.length <= 0) {
+            await argv.session?.send(`${At(argv)}超级计算机『卡佩尔』发生核心故障😵(导力网络异常波动)`);
+            return;
+        }
+
+
+        var todayCount = await ctx.cache.get('todayCache', dailyNameKey);
+
+        if (!todayCount) {
+            todayCount = 0;
+        }
+
+        if (todayCount >= config.maxQuizPerDay) {
+            await argv.session?.send(`${At(argv)}今日答题已到上限哦~明天再来看看吧❤`);
+            return;
+        }
+
+        todayCount++;
+        var cacheTimeoutTime = CafeTimeTools.getRemainingSecondsToBeijingMidnight();
+
+        logger?.debug(`try set cache ${dailyNameKey}, ${todayCount}`);
+
+        await ctx.cache.set('todayCache', dailyNameKey, todayCount, cacheTimeoutTime * 1000);
+
+        var randomId = Random.pick(quizDataIds); // TODO: 应该考虑不出重复的题
+        var qItem = quizDataSet[randomId];
+        var qOptions: any = Random.shuffle(qItem.options);
+        var answerIndex = -1;
+
+        logger?.info(`${argv.session.userId} get a new quiz(id:${randomId})`);
+
+        // 缓存正确答案
+        for (var i = 0; i < qOptions.length; i++) {
+            if (qOptions[i].oid === qItem.a) {
+                answerIndex = i;
+                break;
+            }
+        }
+
+        await ctx.cache.set('question', argv.session.userId, { question: randomId, answer: answerIndex }, config.answerTimeout * 1000);
+
+        var msgQQ: any = {
+            msg_type: 2,
+            msg_id: argv.session.messageId,
+            markdown: {
+                custom_template_id: `${qItem.question.img.length > 0 ? config.qqQuizMDImgID : config.qqQuizMDTextID}`,
+                params: [
+                    {
+                        key: "user",
+                        values: [`${argv.session.userId}`]
+                    },
+                    {
+                        key: "question",
+                        values: [ctx.censor ? await ctx.censor.transform(qItem.question.s, argv.session) : qItem.question.s]
+                    },
+                    {
+                        key: "max_time",
+                        values: [`${config.answerTimeout}`]
+                    },
+                    {
+                        key: "answer_a",
+                        values: [ctx.censor ? await ctx.censor.transform(qOptions[0].s, argv.session) : qOptions[0].s]
+                    },
+                    {
+                        key: "answer_b",
+                        values: [ctx.censor ? await ctx.censor.transform(qOptions[1].s, argv.session) : qOptions[1].s]
+                    },
+                    {
+                        key: "answer_c",
+                        values: [ctx.censor ? await ctx.censor.transform(qOptions[2].s, argv.session) : qOptions[2].s]
+                    },
+                    {
+                        key: "answer_d",
+                        values: [ctx.censor ? await ctx.censor.transform(qOptions[3].s, argv.session) : qOptions[3].s]
+                    }
+                ]
+            }
+        }
+
+        if (config.appendMDBtn) {
+            msgQQ.keyboard = {
+                id: config.qqQuizButtonID
+            };
+        }
+
+        logger?.debug(JSON.stringify(msgQQ));
+
+        if (argv.session.qq) {
+            await argv.session.qq.sendMessage(argv.session.channelId, msgQQ)
+        } else {
+            await argv.session?.send(JSON.stringify(msgQQ));
+        }
+        return;
+    });
 
     ctx.command("轨迹问答/出题", "随机抽一道题目").action(async (argv, _) => {
 

@@ -1,7 +1,7 @@
 {
     "name": "@azimiao/koishi-plugin-cafe-bot-exp",
     "description": "cafe bot experiment",
-    "version": "0.0.27",
+    "version": "0.0.27-beta6",
     "main": "lib/index.js",
     "typings": "lib/index.d.ts",
     "repository": {
@@ -48,6 +48,7 @@
     },
     "dependencies": {
         "@koishijs/censor": "^1.1.0",
+        "@koishijs/plugin-adapter-qq": "^4.9.2",
         "@stdlib/random-base-uniform": "^0.2.1",
         "fs.promises.exists": "^1.1.4"
     }
