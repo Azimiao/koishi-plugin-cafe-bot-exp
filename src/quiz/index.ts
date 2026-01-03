@@ -220,14 +220,16 @@ export async function apply(ctx: Context, config: Config) {
         await ctx.cache.set('question', argv.session.userId, { question: randomId, answer: answerIndex }, config.answerTimeout * 1000);
 
         var msgQQ: any = {
+            content: "111",
             msg_type: 2,
             msg_id: argv.session.messageId,
+            timestamp: argv.session.timestamp,
             markdown: {
                 custom_template_id: `${qItem.question.img.length > 0 ? config.qqQuizMDImgID : config.qqQuizMDTextID}`,
                 params: [
                     {
                         key: "user",
-                        values: [`${argv.session.userId}`]
+                        values: [(argv.session && !argv.session.isDirect) ? `<qqbot-at-user id="${argv.session.userId}"` : ""] // 群聊能@,私聊不能@
                     },
                     {
                         key: "question",
@@ -256,7 +258,21 @@ export async function apply(ctx: Context, config: Config) {
                 ]
             }
         }
-
+        if(qItem.question.img.length > 0) // 有图
+        {
+            msgQQ.markdown.params.push({
+                key: "img_url",
+                values:[qItem.question.img]
+            });
+            msgQQ.markdown.params.push({
+                key: "img_width",
+                values:[config.imgWidth]
+            });
+            msgQQ.markdown.params.push({
+                key: "img_height",
+                values:[config.imgHeight]
+            });
+        }
         if (config.appendMDBtn) {
             msgQQ.keyboard = {
                 id: config.qqQuizButtonID

@@ -14,6 +14,8 @@ export interface CafeBotQuizConfig {
     qqQuizMDImgID: string,
     qqQuizButtonID: string,
     appendMDBtn: boolean,
+    imgWidth:number,
+    imgHeight:number,
 }
 
 export const CafeBotQuizConfig : Schema<CafeBotQuizConfig> = Schema.object({
@@ -27,4 +29,6 @@ export const CafeBotQuizConfig : Schema<CafeBotQuizConfig> = Schema.object({
     qqQuizMDImgID: Schema.string().description("QQ markdown 题目带图模板ID"),
     qqQuizButtonID: Schema.string().description("QQ按钮ID"),
     appendMDBtn: Schema.boolean().description("是否追加QQ按钮").default(false),
+    imgWidth: Schema.number().description("QQ图像宽度").default(0),
+    imgHeight: Schema.number().description("QQ图像高度").default(0)
 }).description("答题配置");
