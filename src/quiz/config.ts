@@ -16,6 +16,9 @@ export interface CafeBotQuizConfig {
     appendMDBtn: boolean,
     imgWidth:number,
     imgHeight:number,
+    disableDriectMD:boolean,
+    disableDirectMDReply:string,
+    disableMDAt:boolean,
 }
 
 export const CafeBotQuizConfig : Schema<CafeBotQuizConfig> = Schema.object({
@@ -30,5 +33,8 @@ export const CafeBotQuizConfig : Schema<CafeBotQuizConfig> = Schema.object({
     qqQuizButtonID: Schema.string().description("QQ按钮ID"),
     appendMDBtn: Schema.boolean().description("是否追加QQ按钮").default(false),
     imgWidth: Schema.number().description("QQ图像宽度").default(0),
-    imgHeight: Schema.number().description("QQ图像高度").default(0)
+    imgHeight: Schema.number().description("QQ图像高度").default(0),
+    disableDriectMD: Schema.boolean().description("j禁用私聊 MD 回复").default(true),
+    disableDirectMDReply: Schema.string().default("暂不支持私聊回复哦，请从群聊@我吧"),
+    disableMDAt: Schema.boolean().description("在md回复中禁用@").default(false),
 }).description("答题配置");

@@ -1,7 +1,7 @@
 /**
  * 轨迹问答
  */
-import { Context, Random, Schema, segment, Logger } from 'koishi';
+import { Context, Random, Schema, segment, Logger, Argv } from 'koishi';
 import { } from '@koishijs/plugin-help';
 import { } from '@koishijs/cache';
 import { } from "@koishijs/plugin-adapter-qq";
@@ -175,7 +175,6 @@ export async function apply(ctx: Context, config: Config) {
         }
 
         var dailyNameKey = DailySeededName(argv.session.userId);
-        argv.session.user
 
 
         if (quizDataIds == null || quizDataIds.length <= 0) {
@@ -229,7 +228,10 @@ export async function apply(ctx: Context, config: Config) {
                 params: [
                     {
                         key: "user",
-                        values: [(argv.session && !argv.session.isDirect) ? `<qqbot-at-user id="${argv.session.userId}"` : ""] // 群聊能@,私聊不能@
+                        values: [ (config.disableMDAt || argv.session.isDirect) ? 
+                            "你"
+                             :  `<qqbot-at-user id="${argv.session.userId}" />`
+                            ] // 群聊@,私聊不@
                     },
                     {
                         key: "question",
@@ -279,10 +281,50 @@ export async function apply(ctx: Context, config: Config) {
             };
         }
 
-        logger?.debug(JSON.stringify(msgQQ));
+        // logger?.debug(JSON.stringify(msgQQ));
 
         if (argv.session.qq) {
-            await argv.session.qq.sendMessage(argv.session.channelId, msgQQ)
+            try {
+                if(argv.session.event.guild?.id)
+                {
+                    logger?.info(`public msg,use sendMessage,guild id:${argv.session.event.guild.id},channelId:${argv.session.channelId}`);
+                    await argv.session.qq.sendMessage(argv.session.channelId, msgQQ);
+                }else if(argv.session.event.user?.id)
+                {
+                    if(config.disableDriectMD) // 禁止私聊
+                    {
+                        await ctx.cache.delete('question', argv.session.userId);
+                        todayCount--;
+                        await ctx.cache.set('todayCache', dailyNameKey, todayCount, cacheTimeoutTime * 1000);
+                        await argv.session?.send(`${At(argv)}${config.disableDirectMDReply}`);
+                        return;
+                    }
+
+                    logger?.info(`private msg,use sendPrivateMessage,userId:${argv.session.event.user.id}`);
+                    await argv.session.qq.sendPrivateMessage(argv.session.event.user.id, msgQQ);
+                }
+                // if(argv.session.isDirect){
+
+                //     if(config.disableDirectMDReply) // 禁止私聊
+                //     {
+                //         await ctx.cache.delete('question', argv.session.userId);
+                //         await argv.session?.send(`${At(argv)}${config.disableDirectMDReply}`);
+                //         return;
+                //     }
+                //     logger?.info("private msg,use sendPrivateMessage,channelId:" + argv.session.channelId);
+                //     await argv.session.qq.sendPrivateMessage(argv.session.userId, msgQQ);
+                // }else{
+                //      await argv.session.qq.sendMessage(argv.session.channelId, msgQQ);
+                // }
+            } catch (error) {
+                logger?.error("发送QQ MD 消息失败:" + error);
+                logger?.error(JSON.stringify(msgQQ));
+                await ctx.cache.delete('question', argv.session.userId);
+                todayCount--;
+                await ctx.cache.set('todayCache', dailyNameKey, todayCount, cacheTimeoutTime * 1000);
+                await argv.session?.send(`${At(argv)}超级计算机『卡佩尔』发生核心故障😵(~~~)`);
+            }
+
         } else {
             await argv.session?.send(JSON.stringify(msgQQ));
         }
