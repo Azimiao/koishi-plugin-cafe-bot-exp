@@ -19,6 +19,8 @@ export interface CafeBotQuizConfig {
     disableDriectMD:boolean,
     disableDirectMDReply:string,
     disableMDAt:boolean,
+    useReDefine:boolean,
+    insertBeforeAt:string,
 }
 
 export const CafeBotQuizConfig : Schema<CafeBotQuizConfig> = Schema.object({
@@ -37,4 +39,6 @@ export const CafeBotQuizConfig : Schema<CafeBotQuizConfig> = Schema.object({
     disableDriectMD: Schema.boolean().description("j禁用私聊 MD 回复").default(true),
     disableDirectMDReply: Schema.string().default("暂不支持私聊回复哦，请从群聊@我吧"),
     disableMDAt: Schema.boolean().description("在md回复中禁用@").default(false),
+    useReDefine: Schema.boolean().description("test").default(false),
+    insertBeforeAt: Schema.string().description("在@前插入的字符串").default("用户"),
 }).description("答题配置");

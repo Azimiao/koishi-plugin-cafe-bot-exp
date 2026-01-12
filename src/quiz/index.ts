@@ -230,7 +230,8 @@ export async function apply(ctx: Context, config: Config) {
                         key: "user",
                         values: [ (config.disableMDAt || argv.session.isDirect) ? 
                             "你"
-                             :  `<qqbot-at-user id="${argv.session.userId}" />`
+                             :  config.useReDefine ?   `${config.insertBeforeAt}<\@${argv.session.userId}>`
+                                : `${config.insertBeforeAt}<qqbot-at-user id="${argv.session.userId}" />`
                             ] // 群聊@,私聊不@
                     },
                     {
