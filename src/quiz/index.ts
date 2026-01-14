@@ -165,7 +165,7 @@ export async function apply(ctx: Context, config: Config) {
 
     ctx.command("轨迹问答", '证明自己是合格的桂皮吧~');
 
-    ctx.command("轨迹问答/新版出题", "测试新版出题功能", { hidden: true }).action(async (argv, _) => {
+    ctx.command("轨迹问答/新版出题", "新版出题", { hidden: true }).action(async (argv, _) => {
         await downloadQuitDataIfNotExist(ctx, config, false);
 
         var lastQuestion = await ctx.cache.get('question', argv.session.userId);
@@ -269,11 +269,11 @@ export async function apply(ctx: Context, config: Config) {
             });
             msgQQ.markdown.params.push({
                 key: "img_width",
-                values:[config.imgWidth]
+                values:[`${config.imgWidth}${config.MDPicAppendPX? "px":""}`]
             });
             msgQQ.markdown.params.push({
                 key: "img_height",
-                values:[config.imgHeight]
+                values:[`${config.imgHeight}${config.MDPicAppendPX? "px":""}`]
             });
         }
         if (config.appendMDBtn) {
@@ -286,7 +286,7 @@ export async function apply(ctx: Context, config: Config) {
 
         if (argv.session.qq) {
             try {
-                if(argv.session.event.guild?.id)
+                if(!argv.session.isDirect)
                 {
                     logger?.info(`public msg,use sendMessage,guild id:${argv.session.event.guild.id},channelId:${argv.session.channelId}`);
                     await argv.session.qq.sendMessage(argv.session.channelId, msgQQ);
@@ -304,19 +304,6 @@ export async function apply(ctx: Context, config: Config) {
                     logger?.info(`private msg,use sendPrivateMessage,userId:${argv.session.event.user.id}`);
                     await argv.session.qq.sendPrivateMessage(argv.session.event.user.id, msgQQ);
                 }
-                // if(argv.session.isDirect){
-
-                //     if(config.disableDirectMDReply) // 禁止私聊
-                //     {
-                //         await ctx.cache.delete('question', argv.session.userId);
-                //         await argv.session?.send(`${At(argv)}${config.disableDirectMDReply}`);
-                //         return;
-                //     }
-                //     logger?.info("private msg,use sendPrivateMessage,channelId:" + argv.session.channelId);
-                //     await argv.session.qq.sendPrivateMessage(argv.session.userId, msgQQ);
-                // }else{
-                //      await argv.session.qq.sendMessage(argv.session.channelId, msgQQ);
-                // }
             } catch (error) {
                 logger?.error("发送QQ MD 消息失败:" + error);
                 logger?.error(JSON.stringify(msgQQ));
@@ -332,6 +319,180 @@ export async function apply(ctx: Context, config: Config) {
         return;
     });
 
+    ctx.command("轨迹问答/新版出题测试","测试新版出题功能",{hidden:true}).action(async(argv,_)=>{
+
+        var msgQQ: any = {
+            content: "111",
+            msg_type: 2,
+            msg_id: argv.session.messageId,
+            timestamp: argv.session.timestamp,
+            markdown: {
+                custom_template_id: `${config.qqQuizMDTextID}`,
+                params: [
+                    {
+                        key: "user",
+                        values: [ (config.disableMDAt || argv.session.isDirect) ? 
+                            "你"
+                             :  config.useReDefine ?   `${config.insertBeforeAt}<\@${argv.session.userId}>`
+                                : `${config.insertBeforeAt}<qqbot-at-user id="${argv.session.userId}" />`
+                            ] // 群聊@,私聊不@
+                    },
+                    {
+                        key: "question",
+                        values: ["测试问题测试问题测试问题"]
+                    },
+                    {
+                        key: "max_time",
+                        values: [`${config.answerTimeout}`]
+                    },
+                    {
+                        key: "answer_a",
+                        values: ["选项1"]
+                    },
+                    {
+                        key: "answer_b",
+                        values: ["选项2"]
+                    },
+                    {
+                        key: "answer_c",
+                        values: ["选项3"]
+                    },
+                    {
+                        key: "answer_d",
+                        values: ["选项4"]
+                    }
+                ]
+            }
+        }
+       
+        if (config.appendMDBtn) {
+            msgQQ.keyboard = {
+                id: config.qqQuizButtonID
+            };
+        }
+
+        if (argv.session.qq) {
+            try {
+                if(!argv.session.isDirect)
+                {
+                    logger?.info(`public msg,use sendMessage,guild id:${argv.session.event.guild.id},channelId:${argv.session.channelId}`);
+                    await argv.session.qq.sendMessage(argv.session.channelId, msgQQ);
+                }else if(argv.session.event.user?.id)
+                {
+                    if(config.disableDriectMD) // 禁止私聊
+                    {
+                        await argv.session?.send(`${At(argv)}${config.disableDirectMDReply}`);
+                        return;
+                    }
+
+                    logger?.info(`private msg,use sendPrivateMessage,userId:${argv.session.event.user.id}`);
+                    await argv.session.qq.sendPrivateMessage(argv.session.event.user.id, msgQQ);
+                }
+            } catch (error) {
+                logger?.error("发送QQ MD 消息失败:" + error);
+                logger?.error(JSON.stringify(msgQQ));
+                await argv.session?.send(`${At(argv)}超级计算机『卡佩尔』发生核心故障😵(~~~)`);
+            }
+
+        } else {
+            await argv.session?.send(JSON.stringify(msgQQ));
+        }
+        return;
+    });
+    ctx.command("轨迹问答/新版出题图测试",{hidden:true}).action(async(argv,_)=>{
+
+        var msgQQ: any = {
+            content: "111",
+            msg_type: 2,
+            msg_id: argv.session.messageId,
+            timestamp: argv.session.timestamp,
+            markdown: {
+                custom_template_id: `${config.qqQuizMDImgID}`,
+                params: [
+                    {
+                        key: "user",
+                        values: [ (config.disableMDAt || argv.session.isDirect) ? 
+                            "你"
+                             :  config.useReDefine ?   `${config.insertBeforeAt}<\@${argv.session.userId}>`
+                                : `${config.insertBeforeAt}<qqbot-at-user id="${argv.session.userId}" />`
+                            ] // 群聊@,私聊不@
+                    },
+                    {
+                        key: "question",
+                        values: ["测试问题测试问题测试问题"]
+                    },
+                    {
+                        key: "max_time",
+                        values: [`${config.answerTimeout}`]
+                    },
+                    {
+                        key: "answer_a",
+                        values: ["选项1"]
+                    },
+                    {
+                        key: "answer_b",
+                        values: ["选项2"]
+                    },
+                    {
+                        key: "answer_c",
+                        values: ["选项3"]
+                    },
+                    {
+                        key: "answer_d",
+                        values: ["选项4"]
+                    }
+                ]
+            }
+        }
+        msgQQ.markdown.params.push({
+                key: "img_url",
+                values:[`https://cdn.trails-game.com/wp-content/uploads/2021/07/avon.jpg`]
+            });
+            msgQQ.markdown.params.push({
+                key: "img_width",
+                values:[`${config.imgWidth}${config.MDPicAppendPX? "px":""}`]
+            });
+            msgQQ.markdown.params.push({
+                key: "img_height",
+                values:[`${config.imgHeight}${config.MDPicAppendPX? "px":""}`]
+            });
+
+        if (config.appendMDBtn) {
+            msgQQ.keyboard = {
+                id: config.qqQuizButtonID
+            };
+        }
+
+
+        if (argv.session.qq) {
+            try {
+                if(!argv.session.isDirect)
+                {
+                    logger?.info(`public msg,use sendMessage,guild id:${argv.session.event.guild.id},channelId:${argv.session.channelId}`);
+                    await argv.session.qq.sendMessage(argv.session.channelId, msgQQ);
+                }else if(argv.session.event.user?.id)
+                {
+                    if(config.disableDriectMD) // 禁止私聊
+                    {
+                        await argv.session?.send(`${At(argv)}${config.disableDirectMDReply}`);
+                        return;
+                    }
+
+                    logger?.info(`private msg,use sendPrivateMessage,userId:${argv.session.event.user.id}`);
+                    await argv.session.qq.sendPrivateMessage(argv.session.event.user.id, msgQQ);
+                }
+            } catch (error) {
+                logger?.error("发送QQ MD 消息失败:" + error);
+                logger?.error(JSON.stringify(msgQQ));
+                await argv.session?.send(`${At(argv)}超级计算机『卡佩尔』发生核心故障😵(~~~)`);
+            }
+
+        } else {
+            await argv.session?.send(JSON.stringify(msgQQ));
+        }
+        return;
+
+    });
     ctx.command("轨迹问答/出题", "随机抽一道题目").action(async (argv, _) => {
 
         await downloadQuitDataIfNotExist(ctx, config, false);
