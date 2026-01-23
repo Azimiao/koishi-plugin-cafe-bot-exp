@@ -165,7 +165,7 @@ export async function apply(ctx: Context, config: Config) {
 
     ctx.command("轨迹问答", '证明自己是合格的桂皮吧~');
 
-    ctx.command("轨迹问答/新版出题", "新版出题", { hidden: true }).action(async (argv, _) => {
+    ctx.command("轨迹问答/出题", "抽取一道题目", { hidden: false }).action(async (argv, _) => {
         await downloadQuitDataIfNotExist(ctx, config, false);
 
         var lastQuestion = await ctx.cache.get('question', argv.session.userId);
@@ -493,7 +493,7 @@ export async function apply(ctx: Context, config: Config) {
         return;
 
     });
-    ctx.command("轨迹问答/出题", "随机抽一道题目").action(async (argv, _) => {
+    ctx.command("轨迹问答/旧出题", "随机抽一道题目(旧版)",{hidden: true}).action(async (argv, _) => {
 
         await downloadQuitDataIfNotExist(ctx, config, false);
 
